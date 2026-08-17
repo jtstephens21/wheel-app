@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Wheel of Activities</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2b1055">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --bg1:#2b1055;
+    --bg2:#7597de;
+    --card:#ffffff;
+    --text:#24243e;
+    --accent:#ff5e7e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: -apple-system, Roboto, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    min-height:100vh;
+    color:var(--text);
+    padding-bottom:40px;
+  }
+  header{
+    text-align:center;
+    padding:22px 12px 10px;
+    color:#fff;
+  }
+  header h1{
+    margin:0;
+    font-size:1.5rem;
+    letter-spacing:0.5px;
+    text-shadow:0 2px 6px rgba(0,0,0,0.3);
+  }
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin:14px 12px 18px;
+  }
+  .tab-btn{
+    flex:1;
+    max-width:220px;
+    padding:12px 8px;
+    border:none;
+    border-radius:999px;
+    font-size:0.95rem;
+    font-weight:700;
+    background:rgba(255,255,255,0.18);
+    color:#fff;
+    cursor:pointer;
+    transition:0.2s;
+  }
+  .tab-btn.active{
+    background:#fff;
+    color:var(--bg1);
+    box-shadow:0 4px 14px rgba(0,0,0,0.25);
+  }
+  .tab-content{display:none; padding:0 14px; max-width:480px; margin:0 auto;}
+  .tab-content.active{display:block;}
+
+  .wheel-section{
+    background:var(--card);
+    border-radius:22px;
+    padding:20px 14px 22px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .wheel-wrap{
+    position:relative;
+    margin-top:14px;
+  }
+  .pointer{
+    position:absolute;
+    top:-16px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;height:0;
+    border-left:15px solid transparent;
+    border-right:15px solid transparent;
+    border-top:24px solid #24243e;
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,0.35));
+    z-index:5;
+  }
+  canvas{
+    border-radius:50%;
+    box-shadow:0 0 0 6px #fff, 0 8px 24px rgba(0,0,0,0.35);
+    display:block;
+  }
+  .controls{
+    margin-top:22px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:100%;
+    align-items:center;
+  }
+  .spin-btn{
+    width:100%;
+    max-width:260px;
+    padding:16px;
+    font-size:1.2rem;
+    font-weight:800;
+    letter-spacing:1px;
+    border:none;
+    border-radius:16px;
+    color:#fff;
+    background:linear-gradient(135deg,#ff5e7e,#ff9966);
+    box-shadow:0 6px 16px rgba(255,94,126,0.45);
+    cursor:pointer;
+  }
+  .spin-btn:disabled{
+    opacity:0.55;
+    box-shadow:none;
+  }
+  .manage-btn{
+    background:none;
+    border:none;
+    color:#5a4fcf;
+    font-weight:700;
+    font-size:0.95rem;
+    padding:6px;
+    cursor:pointer;
+  }
+
+  .log-section{
+    margin-top:20px;
+    background:rgba(255,255,255,0.95);
+    border-radius:18px;
+    padding:14px 16px 18px;
+    box-shadow:0 8px 22px rgba(0,0,0,0.2);
+  }
+  .log-section h3{
+    margin:0 0 10px;
+    font-size:1rem;
+    color:var(--text);
+  }
+  .log-list{
+    list-style:none;
+    margin:0;padding:0;
+    max-height:260px;
+    overflow-y:auto;
+  }
+  .log-list li{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:9px 4px;
+    border-bottom:1px solid #eee;
+    font-size:0.9rem;
+  }
+  .log-list li:last-child{border-bottom:none;}
+  .log-list .log-date{
+    color:#888;
+    white-space:nowrap;
+    font-size:0.78rem;
+    padding-top:2px;
+  }
+  .log-list .log-item{
+    font-weight:600;
+    text-align:right;
+  }
+  .log-list li.empty{
+    justify-content:center;
+    color:#aaa;
+    font-style:italic;
+  }
+
+  /* Modal */
+  .modal{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .modal.hidden{display:none;}
+  .modal-content{
+    background:#fff;
+    width:100%;
+    max-width:480px;
+    border-radius:20px 20px 0 0;
+    padding:18px 18px 26px;
+    max-height:80vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .modal-content h3{margin:0 0 12px;}
+  #manageList{
+    list-style:none;
+    margin:0 0 14px;
+    padding:0;
+    overflow-y:auto;
+    flex:1;
+  }
+  #manageList li{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 4px;
+    border-bottom:1px solid #eee;
+    font-size:0.95rem;
+  }
+  #manageList button{
+    border:none;
+    background:#ffe1e6;
+    color:#d13a53;
+    font-weight:700;
+    border-radius:8px;
+    padding:6px 10px;
+    cursor:pointer;
+  }
+  .add-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .add-row input{
+    flex:1;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    font-size:0.95rem;
+  }
+  .add-row button{
+    padding:10px 16px;
+    border:none;
+    border-radius:10px;
+    background:#5a4fcf;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .secondary{
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#f1f1f4;
+    color:var(--text);
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  #confettiCanvas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:100;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎡 Wheel of Activities</h1>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="freetime">🎯 Free Time</button>
+  <button class="tab-btn" data-tab="baby">👶 Baby Activities</button>
+</div>
+
+<!-- FREE TIME TAB -->
+<div class="tab-content active" id="freetime-panel">
+  <div class="wheel-section">
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="freetimeCanvas"></canvas>
+    </div>
+    <div class="controls">
+      <button class="spin-btn" id="freetimeSpinBtn">SPIN</button>
+      <button class="manage-btn" id="freetimeManageBtn">✏️ Add / Remove Options</button>
+    </div>
+  </div>
+  <div class="log-section">
+    <h3>Spin Log</h3>
+    <ul class="log-list" id="freetimeLog"></ul>
+  </div>
+</div>
+
+<!-- BABY TAB -->
+<div class="tab-content" id="baby-panel">
+  <div class="wheel-section">
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="babyCanvas"></canvas>
+    </div>
+    <div class="controls">
+      <button class="spin-btn" id="babySpinBtn">SPIN</button>
+      <button class="manage-btn" id="babyManageBtn">✏️ Add / Remove Options</button>
+    </div>
+  </div>
+  <div class="log-section">
+    <h3>Spin Log</h3>
+    <ul class="log-list" id="babyLog"></ul>
+  </div>
+</div>
+
+<!-- MANAGE MODAL -->
+<div class="modal hidden" id="manageModal">
+  <div class="modal-content">
+    <h3 id="manageTitle">Manage Wheel</h3>
+    <ul id="manageList"></ul>
+    <div class="add-row">
+      <input type="text" id="newItemInput" placeholder="Add new option">
+      <button id="addItemBtn">Add</button>
+    </div>
+    <button class="secondary" id="closeManageBtn">Done</button>
+  </div>
+</div>
+
+<canvas id="confettiCanvas"></canvas>
+
+<script>
+(function(){
+  "use strict";
+
+  var COLORS = ["#FF6B6B","#FFB84D","#6BCB77","#4D96FF","#FF6EC7","#9B5DE5",
+                "#00BBF9","#00D9A0","#F7C548","#F15BB5","#43AA8B","#F94144"];
+
+  var DEFAULTS = {
+    freetime: [
+      "Build robot","Play KCD2","Lift weights","Do something from Todoist",
+      "Meditate","Clean something","Watch TV","Cook something",
+      "Read DCC","Take a bath","Unpack something from move"
+    ],
+    baby: [
+      "Play ball in play room","Pull ups on bed","Play w books in nursery",
+      "Play w wood toys in guest room","Go on a walk",
+      "Go to Anchor park / dance party in play room",
+      "Go to the library & park / story time in nursery",
+      "Go to Concord park / coloring time",
+      "Go to the pool / water table","Puppet show in play room","Climb stairs"
+    ]
+  };
+
+  var STORAGE_KEY = "wheelAppState_v1";
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(parsed.freetime && parsed.baby) return parsed;
+      }
+    }catch(e){}
+    return {
+      freetime:{ master: DEFAULTS.freetime.slice(), remaining: DEFAULTS.freetime.slice(), log: [] },
+      baby:{ master: DEFAULTS.baby.slice(), remaining: DEFAULTS.baby.slice(), log: [] }
+    };
+  }
+
+  var data = loadState();
+  var spinning = { freetime:false, baby:false };
+  var currentManageKey = null;
+
+  function saveState(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  // ---------- Wheel drawing ----------
+  function setupCanvas(canvas, size){
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+    var ctx = canvas.getContext("2d");
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
+    return ctx;
+  }
+
+  function wrapLabel(ctx, label, maxWidth){
+    var words = label.split(" ");
+    var lines = [];
+    var current = "";
+    for(var i=0;i<words.length;i++){
+      var test = current ? current + " " + words[i] : words[i];
+      if(ctx.measureText(test).width > maxWidth && current){
+        lines.push(current);
+        current = words[i];
+      } else {
+        current = test;
+      }
+    }
+    if(current) lines.push(current);
+    if(lines.length > 2){
+      lines = lines.slice(0,2);
+      lines[1] = lines[1].replace(/\s*\S*$/, "") + "…";
+    }
+    return lines;
+  }
+
+  function drawWheel(canvas, ctx, size, items){
+    var radius = size/2;
+    ctx.clearRect(0,0,size,size);
+
+    if(items.length === 0){
+      ctx.beginPath();
+      ctx.arc(radius, radius, radius-4, 0, Math.PI*2);
+      ctx.fillStyle = "#eeeeee";
+      ctx.fill();
+      ctx.fillStyle = "#999";
+      ctx.font = "bold 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("All done!", radius, radius+6);
+      return;
+    }
+
+    var n = items.length;
+    var sliceAngle = (Math.PI*2)/n;
+
+    for(var i=0;i<n;i++){
+      var start = -Math.PI/2 + i*sliceAngle;
+      var end = start + sliceAngle;
+      ctx.beginPath();
+      ctx.moveTo(radius, radius);
+      ctx.arc(radius, radius, radius-4, start, end);
+      ctx.closePath();
+      ctx.fillStyle = COLORS[i % COLORS.length];
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(radius, radius);
+      ctx.rotate(start + sliceAngle/2);
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.shadowColor = "rgba(0,0,0,0.45)";
+      ctx.shadowBlur = 3;
+
+      var maxWidth = Math.max(40, radius*0.68);
+      var lines = wrapLabel(ctx, items[i], maxWidth);
+      var lineHeight = 13;
+      var totalH = lines.length * lineHeight;
+      var textRadius = radius * 0.62;
+      for(var li=0; li<lines.length; li++){
+        ctx.fillText(lines[li], textRadius, -totalH/2 + li*lineHeight + lineHeight/2);
+      }
+      ctx.restore();
+    }
+  }
+
+  // ---------- Per-tab wiring ----------
+  var WHEEL_SIZE = Math.min(300, window.innerWidth - 64);
+
+  var wheels = {};
+  ["freetime","baby"].forEach(function(key){
+    var canvas = document.getElementById(key+"Canvas");
+    var ctx = setupCanvas(canvas, WHEEL_SIZE);
+    wheels[key] = { canvas: canvas, ctx: ctx };
+    drawWheel(canvas, ctx, WHEEL_SIZE, data[key].remaining);
+    renderLog(key);
+  });
+
+  function renderLog(key){
+    var listEl = document.getElementById(key+"Log");
+    var entries = data[key].log;
+    if(entries.length === 0){
+      listEl.innerHTML = '<li class="empty">No spins yet</li>';
+      return;
+    }
+    listEl.innerHTML = entries.map(function(e){
+      var d = new Date(e.date);
+      var dateStr = d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+      var timeStr = d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+      return '<li><span class="log-date">'+dateStr+' · '+timeStr+'</span>'+
+             '<span class="log-item">'+escapeHtml(e.item)+'</span></li>';
+    }).join("");
+  }
+
+  function setSpinBtnEnabled(key, enabled){
+    document.getElementById(key+"SpinBtn").disabled = !enabled;
+  }
+
+  function spinWheel(key){
+    if(spinning[key]) return;
+    var state = data[key];
+    if(state.remaining.length === 0) return;
+    spinning[key] = true;
+    setSpinBtnEnabled(key, false);
+
+    var canvas = wheels[key].canvas;
+    var n = state.remaining.length;
+    var sliceAngle = 360/n;
+    var randomIndex = Math.floor(Math.random()*n);
+    var jitter = (Math.random()*0.5 - 0.25) * sliceAngle;
+    var stopAngle = 360 - (randomIndex*sliceAngle + sliceAngle/2 + jitter);
+    var spins = 5 + Math.floor(Math.random()*2);
+    var finalRotation = spins*360 + stopAngle;
+
+    canvas.style.transition = "none";
+    canvas.style.transform = "rotate(0deg)";
+    void canvas.offsetWidth;
+    canvas.style.transition = "transform 4s cubic-bezier(0.15,0.65,0.25,1)";
+
+    requestAnimationFrame(function(){
+      canvas.style.transform = "rotate(" + finalRotation + "deg)";
+    });
+
+    function handler(e){
+      if(e.propertyName !== "transform") return;
+      canvas.removeEventListener("transitionend", handler);
+      onSpinComplete(key, randomIndex);
+    }
+    canvas.addEventListener("transitionend", handler);
+  }
+
+  function onSpinComplete(key, index){
+    var state = data[key];
+    var item = state.remaining[index];
+    state.remaining.splice(index, 1);
+    state.log.unshift({ date: new Date().toISOString(), item: item });
+    saveState();
+    renderLog(key);
+
+    var canvas = wheels[key].canvas;
+    var ctx = wheels[key].ctx;
+
+    // snap wheel back upright, then redraw with remaining items
+    canvas.style.transition = "none";
+    canvas.style.transform = "rotate(0deg)";
+    void canvas.offsetWidth;
+
+    if(state.remaining.length === 0){
+      drawWheel(canvas, ctx, WHEEL_SIZE, []);
+      launchConfetti();
+      setTimeout(function(){
+        state.remaining = state.master.slice();
+        saveState();
+        drawWheel(canvas, ctx, WHEEL_SIZE, state.remaining);
+        spinning[key] = false;
+        setSpinBtnEnabled(key, state.remaining.length > 0);
+      }, 2600);
+    } else {
+      drawWheel(canvas, ctx, WHEEL_SIZE, state.remaining);
+      spinning[key] = false;
+      setSpinBtnEnabled(key, true);
+    }
+  }
+
+  document.getElementById("freetimeSpinBtn").addEventListener("click", function(){ spinWheel("freetime"); });
+  document.getElementById("babySpinBtn").addEventListener("click", function(){ spinWheel("baby"); });
+
+  // ---------- Tabs ----------
+  var tabBtns = document.querySelectorAll(".tab-btn");
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){ b.classList.remove("active"); });
+      btn.classList.add("active");
+      document.querySelectorAll(".tab-content").forEach(function(p){ p.classList.remove("active"); });
+      document.getElementById(btn.dataset.tab+"-panel").classList.add("active");
+    });
+  });
+
+  // ---------- Manage modal ----------
+  var manageModal = document.getElementById("manageModal");
+  var manageList = document.getElementById("manageList");
+  var manageTitle = document.getElementById("manageTitle");
+  var newItemInput = document.getElementById("newItemInput");
+
+  function openManage(key){
+    currentManageKey = key;
+    manageTitle.textContent = (key === "freetime" ? "Free Time Wheel" : "Baby Activities Wheel") + " Options";
+    renderManageList();
+    manageModal.classList.remove("hidden");
+  }
+
+  function renderManageList(){
+    var master = data[currentManageKey].master;
+    if(master.length === 0){
+      manageList.innerHTML = '<li style="justify-content:center;color:#aaa;font-style:italic;">No options yet — add one below</li>';
+      return;
+    }
+    manageList.innerHTML = master.map(function(item, idx){
+      return '<li><span>'+escapeHtml(item)+'</span>'+
+             '<button data-idx="'+idx+'">Remove</button></li>';
+    }).join("");
+  }
+
+  manageList.addEventListener("click", function(e){
+    var btn = e.target.closest("button[data-idx]");
+    if(!btn) return;
+    var idx = parseInt(btn.dataset.idx, 10);
+    var key = currentManageKey;
+    var removedItem = data[key].master[idx];
+    data[key].master.splice(idx, 1);
+    var remIdx = data[key].remaining.indexOf(removedItem);
+    if(remIdx !== -1) data[key].remaining.splice(remIdx, 1);
+    saveState();
+    renderManageList();
+    drawWheel(wheels[key].canvas, wheels[key].ctx, WHEEL_SIZE, data[key].remaining);
+    setSpinBtnEnabled(key, data[key].remaining.length > 0);
+  });
+
+  document.getElementById("addItemBtn").addEventListener("click", addNewItem);
+  newItemInput.addEventListener("keydown", function(e){
+    if(e.key === "Enter") addNewItem();
+  });
+
+  function addNewItem(){
+    var val = newItemInput.value.trim();
+    if(!val) return;
+    var key = currentManageKey;
+    data[key].master.push(val);
+    data[key].remaining.push(val);
+    saveState();
+    newItemInput.value = "";
+    renderManageList();
+    drawWheel(wheels[key].canvas, wheels[key].ctx, WHEEL_SIZE, data[key].remaining);
+    setSpinBtnEnabled(key, data[key].remaining.length > 0);
+  }
+
+  document.getElementById("freetimeManageBtn").addEventListener("click", function(){ openManage("freetime"); });
+  document.getElementById("babyManageBtn").addEventListener("click", function(){ openManage("baby"); });
+  document.getElementById("closeManageBtn").addEventListener("click", function(){
+    manageModal.classList.add("hidden");
+  });
+  manageModal.addEventListener("click", function(e){
+    if(e.target === manageModal) manageModal.classList.add("hidden");
+  });
+
+  // ---------- Confetti ----------
+  var confettiCanvas = document.getElementById("confettiCanvas");
+  var cctx = confettiCanvas.getContext("2d");
+  function resizeConfetti(){
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeConfetti);
+  resizeConfetti();
+
+  function launchConfetti(){
+    confettiCanvas.style.display = "block";
+    var particles = [];
+    var count = 140;
+    for(var i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*confettiCanvas.width,
+        y: -20 - Math.random()*confettiCanvas.height*0.4,
+        w: 6+Math.random()*6,
+        h: 8+Math.random()*8,
+        color: COLORS[Math.floor(Math.random()*COLORS.length)],
+        vx: -2+Math.random()*4,
+        vy: 3+Math.random()*3,
+        rot: Math.random()*360,
+        vrot: -12+Math.random()*24
+      });
+    }
+    var start = performance.now();
+    var duration = 2400;
+    function frame(now){
+      var elapsed = now - start;
+      cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      particles.forEach(function(p){
+        p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+        cctx.save();
+        cctx.translate(p.x, p.y);
+        cctx.rotate(p.rot*Math.PI/180);
+        cctx.fillStyle = p.color;
+        cctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        cctx.restore();
+      });
+      if(elapsed < duration){
+        requestAnimationFrame(frame);
+      } else {
+        cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        confettiCanvas.style.display = "none";
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- PWA install support ----------
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
