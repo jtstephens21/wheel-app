@@ -32,28 +32,28 @@
   }
   header h1{
     margin:0;
-    font-size:1.5rem;
+    font-size:1.4rem;
     letter-spacing:0.5px;
     text-shadow:0 2px 6px rgba(0,0,0,0.3);
   }
   .tabs{
     display:flex;
     justify-content:center;
-    gap:8px;
-    margin:14px 12px 18px;
+    gap:6px;
+    margin:14px 10px 18px;
   }
   .tab-btn{
     flex:1;
-    max-width:220px;
-    padding:12px 8px;
+    padding:10px 3px;
     border:none;
     border-radius:999px;
-    font-size:0.95rem;
+    font-size:0.7rem;
     font-weight:700;
     background:rgba(255,255,255,0.18);
     color:#fff;
     cursor:pointer;
     transition:0.2s;
+    white-space:nowrap;
   }
   .tab-btn.active{
     background:#fff;
@@ -144,27 +144,37 @@
   .log-list{
     list-style:none;
     margin:0;padding:0;
-    max-height:260px;
+    max-height:280px;
     overflow-y:auto;
   }
   .log-list li{
     display:flex;
     justify-content:space-between;
-    gap:10px;
+    align-items:center;
+    gap:8px;
     padding:9px 4px;
     border-bottom:1px solid #eee;
     font-size:0.9rem;
   }
   .log-list li:last-child{border-bottom:none;}
+  .log-left{display:flex; flex-direction:column; gap:2px; min-width:0;}
   .log-list .log-date{
     color:#888;
     white-space:nowrap;
-    font-size:0.78rem;
-    padding-top:2px;
+    font-size:0.76rem;
   }
   .log-list .log-item{
     font-weight:600;
-    text-align:right;
+    overflow-wrap:anywhere;
+  }
+  .log-edit-btn{
+    border:none;
+    background:#f1f1f4;
+    border-radius:10px;
+    padding:7px 9px;
+    font-size:0.9rem;
+    cursor:pointer;
+    flex-shrink:0;
   }
   .log-list li.empty{
     justify-content:center;
@@ -175,11 +185,11 @@
   /* Modal */
   .modal{
     position:fixed; inset:0;
-    background:rgba(0,0,0,0.5);
+    background:rgba(0,0,0,0.55);
     display:flex;
     align-items:flex-end;
     justify-content:center;
-    z-index:50;
+    z-index:80;
   }
   .modal.hidden{display:none;}
   .modal-content{
@@ -187,8 +197,8 @@
     width:100%;
     max-width:480px;
     border-radius:20px 20px 0 0;
-    padding:18px 18px 26px;
-    max-height:80vh;
+    padding:22px 18px 26px;
+    max-height:85vh;
     display:flex;
     flex-direction:column;
   }
@@ -222,12 +232,14 @@
     gap:8px;
     margin-bottom:12px;
   }
-  .add-row input{
+  .add-row input, .field-input{
     flex:1;
-    padding:10px 12px;
+    padding:12px 12px;
     border-radius:10px;
     border:1px solid #ddd;
     font-size:0.95rem;
+    width:100%;
+    margin-bottom:10px;
   }
   .add-row button{
     padding:10px 16px;
@@ -247,12 +259,148 @@
     font-weight:700;
     cursor:pointer;
   }
+  .danger-text{ color:#d13a53; }
+  .row-gap{ display:flex; gap:10px; margin-top:6px; }
+  .row-gap > *{ flex:1; }
+
+  /* Completion gate modal */
+  #completeModal .modal-content{ text-align:center; align-items:center; }
+  #completeEmojiDisplay{ font-size:3.4rem; }
+  #completeItemText{ font-size:1.15rem; font-weight:800; margin:6px 0 22px; color:#5a4fcf; }
+
+  /* Achievements */
+  .achv-summary{
+    background:rgba(255,255,255,0.95);
+    border-radius:18px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 8px 22px rgba(0,0,0,0.2);
+    color:var(--text);
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  .achv-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    padding-bottom:20px;
+  }
+  .achv-card{
+    background:#fff;
+    border-radius:16px;
+    padding:12px 6px 10px;
+    text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+    cursor:pointer;
+    position:relative;
+  }
+  .achv-emoji{ font-size:2rem; }
+  .achv-name{ font-size:0.68rem; font-weight:700; margin-top:6px; line-height:1.25; }
+  .achv-card.locked .achv-emoji{ filter:grayscale(1); opacity:0.32; }
+  .achv-card.locked .achv-name{ opacity:0.45; }
+  .achv-lock-badge{ position:absolute; top:4px; right:6px; font-size:0.8rem; }
+
+  #badgeModal .modal-content{ text-align:center; align-items:center; }
+  #badgeModalEmoji{ font-size:3.6rem; }
+  #badgeModalStatus{ font-weight:800; margin:2px 0 10px; }
+  #badgeModalDesc{ color:#555; margin:0; }
+
+  /* Toast */
+  #achievementToast{
+    position:fixed;
+    top:-160px;
+    left:50%;
+    transform:translateX(-50%);
+    background:linear-gradient(135deg,#ffd93d,#ff9f43);
+    color:#3a2a00;
+    padding:14px 20px;
+    border-radius:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.4);
+    z-index:200;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    transition:top 0.5s cubic-bezier(.34,1.56,.64,1);
+    max-width:88vw;
+  }
+  #achievementToast.show{ top:20px; }
+  #toastEmoji{ font-size:2.3rem; }
+  .toast-label{ font-weight:800; font-size:0.68rem; letter-spacing:0.5px; opacity:0.75; }
+  #toastName{ font-weight:800; font-size:1.05rem; }
+
+  /* Calendar */
+  .cal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(255,255,255,0.95);
+    border-radius:16px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    box-shadow:0 8px 22px rgba(0,0,0,0.2);
+  }
+  .cal-nav-btn{
+    background:#5a4fcf;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    width:38px;
+    height:38px;
+    font-size:1.2rem;
+    font-weight:800;
+    cursor:pointer;
+  }
+  #calMonthLabel{ font-weight:800; font-size:1rem; color:var(--text); }
+  .cal-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    margin-bottom:6px;
+  }
+  .cal-weekdays div{
+    text-align:center;
+    font-size:0.66rem;
+    font-weight:700;
+    color:#fff;
+    opacity:0.85;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:4px;
+    padding-bottom:20px;
+  }
+  .cal-cell{
+    background:#fff;
+    border-radius:10px;
+    min-height:54px;
+    padding:4px 2px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    cursor:pointer;
+  }
+  .cal-cell.empty{ background:transparent; box-shadow:none; cursor:default; }
+  .cal-cell.today{ outline:2px solid #ff5e7e; }
+  .cal-daynum{ font-size:0.7rem; font-weight:700; color:#666; }
+  .cal-icons{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:1px;
+    margin-top:2px;
+  }
+  .cal-icon{ font-size:0.8rem; line-height:1; }
+  .cal-more{ font-size:0.58rem; color:#888; font-weight:700; margin-top:1px; }
+
+  #dayDetailModal .modal-content{ text-align:left; }
 
   #confettiCanvas{
     position:fixed;
     inset:0;
     pointer-events:none;
-    z-index:100;
+    z-index:150;
     display:none;
   }
 </style>
@@ -265,7 +413,9 @@
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="freetime">🎯 Free Time</button>
-  <button class="tab-btn" data-tab="baby">👶 Baby Activities</button>
+  <button class="tab-btn" data-tab="baby">👶 Baby</button>
+  <button class="tab-btn" data-tab="achievements">🏆 Achievements</button>
+  <button class="tab-btn" data-tab="history">📅 History</button>
 </div>
 
 <!-- FREE TIME TAB -->
@@ -304,6 +454,25 @@
   </div>
 </div>
 
+<!-- ACHIEVEMENTS TAB -->
+<div class="tab-content" id="achievements-panel">
+  <div class="achv-summary" id="achvSummary">🏆 0 / 0 badges unlocked</div>
+  <div class="achv-grid" id="achievementsGrid"></div>
+</div>
+
+<!-- HISTORY TAB -->
+<div class="tab-content" id="history-panel">
+  <div class="cal-header">
+    <button class="cal-nav-btn" id="calPrevBtn">‹</button>
+    <span id="calMonthLabel">Month Year</span>
+    <button class="cal-nav-btn" id="calNextBtn">›</button>
+  </div>
+  <div class="cal-weekdays">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
 <!-- MANAGE MODAL -->
 <div class="modal hidden" id="manageModal">
   <div class="modal-content">
@@ -314,6 +483,58 @@
       <button id="addItemBtn">Add</button>
     </div>
     <button class="secondary" id="closeManageBtn">Done</button>
+  </div>
+</div>
+
+<!-- EDIT LOG ENTRY MODAL -->
+<div class="modal hidden" id="editLogModal">
+  <div class="modal-content">
+    <h3>Edit Entry</h3>
+    <input type="text" class="field-input" id="editItemInput" placeholder="What you did">
+    <input type="datetime-local" class="field-input" id="editDateInput">
+    <div class="row-gap">
+      <button class="spin-btn" id="saveEditBtn" style="padding:12px; font-size:1rem;">Save</button>
+      <button class="secondary danger-text" id="deleteEditBtn">Delete</button>
+    </div>
+    <button class="secondary" id="cancelEditBtn" style="margin-top:10px;">Cancel</button>
+  </div>
+</div>
+
+<!-- COMPLETION GATE MODAL (no backdrop close, no X) -->
+<div class="modal hidden" id="completeModal">
+  <div class="modal-content">
+    <div id="completeEmojiDisplay">🎯</div>
+    <h3>Have you completed:</h3>
+    <p id="completeItemText"></p>
+    <button class="spin-btn" id="completeDoneBtn" style="width:100%;">Done ✅</button>
+  </div>
+</div>
+
+<!-- BADGE DETAIL MODAL -->
+<div class="modal hidden" id="badgeModal">
+  <div class="modal-content">
+    <div id="badgeModalEmoji"></div>
+    <h3 id="badgeModalName"></h3>
+    <p id="badgeModalStatus"></p>
+    <p id="badgeModalDesc"></p>
+    <button class="secondary" id="closeBadgeModalBtn" style="margin-top:16px; width:100%;">Close</button>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div class="modal hidden" id="dayDetailModal">
+  <div class="modal-content">
+    <h3 id="dayDetailTitle"></h3>
+    <ul id="dayDetailList" style="list-style:none;padding:0;margin:0;max-height:50vh;overflow-y:auto;"></ul>
+    <button class="secondary" id="closeDayDetailBtn" style="margin-top:16px;">Close</button>
+  </div>
+</div>
+
+<div id="achievementToast">
+  <div id="toastEmoji">🏆</div>
+  <div>
+    <div class="toast-label">ACHIEVEMENT UNLOCKED</div>
+    <div id="toastName"></div>
   </div>
 </div>
 
@@ -343,24 +564,171 @@
   };
 
   var STORAGE_KEY = "wheelAppState_v1";
+  var needsRetroactiveUnlock = false;
 
+  // ---------- Emoji picking ----------
+  var EMOJI_MAP = [
+    {kw:"robot", emoji:"🤖"}, {kw:"kcd", emoji:"🎮"}, {kw:"weight", emoji:"🏋️"},
+    {kw:"todoist", emoji:"✅"}, {kw:"meditat", emoji:"🧘"}, {kw:"clean", emoji:"🧹"},
+    {kw:"tv", emoji:"📺"}, {kw:"cook", emoji:"🍳"}, {kw:"dcc", emoji:"📖"},
+    {kw:"bath", emoji:"🛁"}, {kw:"unpack", emoji:"📦"},
+    {kw:"ball", emoji:"⚽"}, {kw:"pull up", emoji:"🤸"}, {kw:"book", emoji:"📚"},
+    {kw:"wood", emoji:"🧸"}, {kw:"walk", emoji:"🚶"}, {kw:"dance", emoji:"💃"},
+    {kw:"anchor", emoji:"⚓"}, {kw:"story", emoji:"📗"}, {kw:"library", emoji:"📗"},
+    {kw:"coloring", emoji:"🎨"}, {kw:"concord", emoji:"🎨"}, {kw:"pool", emoji:"💦"},
+    {kw:"water", emoji:"💦"}, {kw:"puppet", emoji:"🎭"}, {kw:"stair", emoji:"🪜"}
+  ];
+  var FALLBACK_EMOJIS = ["🎉","⭐","✅","🙌","🎊"];
+  function pickEmoji(text){
+    var lower = String(text).toLowerCase();
+    for(var i=0;i<EMOJI_MAP.length;i++){
+      if(lower.indexOf(EMOJI_MAP[i].kw) !== -1) return EMOJI_MAP[i].emoji;
+    }
+    return FALLBACK_EMOJIS[Math.floor(Math.random()*FALLBACK_EMOJIS.length)];
+  }
+
+  // ---------- Achievements definitions ----------
+  var ACHIEVEMENTS = [
+    // Free time: Build robot
+    {id:"robot-1", name:"First Contact", emoji:"🤖", desc:'Complete "Build robot" for the first time.', test:function(s){return s.kw("robot")>=1;}},
+    {id:"robot-2", name:"Mad Scientist", emoji:"🧪", desc:'Complete "Build robot" 5 times.', test:function(s){return s.kw("robot")>=5;}},
+    // Play KCD2
+    {id:"kcd-1", name:"New Adventurer", emoji:"🎮", desc:'Complete "Play KCD2" for the first time.', test:function(s){return s.kw("kcd")>=1;}},
+    {id:"kcd-2", name:"Knight of the Realm", emoji:"⚔️", desc:'Complete "Play KCD2" 10 times.', test:function(s){return s.kw("kcd")>=10;}},
+    // Lift weights
+    {id:"weights-1", name:"First Rep", emoji:"💪", desc:'Complete "Lift weights" for the first time.', test:function(s){return s.kw("weight")>=1;}},
+    {id:"weights-2", name:"Muscle Man", emoji:"🏋️", desc:'Complete "Lift weights" 5 times.', test:function(s){return s.kw("weight")>=5;}},
+    {id:"weights-3", name:"Iron Titan", emoji:"🦾", desc:'Complete "Lift weights" 20 times.', test:function(s){return s.kw("weight")>=20;}},
+    // Todoist
+    {id:"todoist-1", name:"Getting Things Done", emoji:"✅", desc:'Complete a Todoist task for the first time.', test:function(s){return s.kw("todoist")>=1;}},
+    {id:"todoist-2", name:"Inbox Zero Hero", emoji:"📋", desc:'Complete Todoist tasks 10 times.', test:function(s){return s.kw("todoist")>=10;}},
+    // Meditate
+    {id:"meditate-1", name:"First Breath", emoji:"🧘", desc:"Meditate for the first time.", test:function(s){return s.kw("meditat")>=1;}},
+    {id:"meditate-2", name:"Zen Master", emoji:"☯️", desc:"Meditate 10 times.", test:function(s){return s.kw("meditat")>=10;}},
+    // Clean
+    {id:"clean-1", name:"Spring Cleaning", emoji:"🧹", desc:"Clean something for the first time.", test:function(s){return s.kw("clean")>=1;}},
+    {id:"clean-2", name:"Neat Freak", emoji:"✨", desc:"Clean something 10 times.", test:function(s){return s.kw("clean")>=10;}},
+    // TV
+    {id:"tv-1", name:"Couch Potato Initiate", emoji:"📺", desc:"Watch TV for the first time.", test:function(s){return s.wordKw("tv")>=1;}},
+    {id:"tv-2", name:"Binge Champion", emoji:"🍿", desc:"Watch TV 10 times.", test:function(s){return s.wordKw("tv")>=10;}},
+    // Cook
+    {id:"cook-1", name:"Kitchen Rookie", emoji:"🍳", desc:"Cook something for the first time.", test:function(s){return s.kw("cook")>=1;}},
+    {id:"cook-2", name:"Master Chef", emoji:"👨‍🍳", desc:"Cook something 10 times.", test:function(s){return s.kw("cook")>=10;}},
+    // Read DCC
+    {id:"dcc-1", name:"Page One", emoji:"📖", desc:"Read DCC for the first time.", test:function(s){return s.kw("dcc")>=1;}},
+    {id:"dcc-2", name:"Dungeon Crawler", emoji:"🐉", desc:"Read DCC 8 times.", test:function(s){return s.kw("dcc")>=8;}},
+    // Bath
+    {id:"bath-1", name:"Rubber Duck Debut", emoji:"🛁", desc:"Take a bath for the first time.", test:function(s){return s.kw("bath")>=1;}},
+    {id:"bath-2", name:"Soak Star", emoji:"🦆", desc:"Take a bath 12 times.", test:function(s){return s.kw("bath")>=12;}},
+    // Unpack
+    {id:"unpack-1", name:"Box Opener", emoji:"📦", desc:"Unpack something for the first time.", test:function(s){return s.kw("unpack")>=1;}},
+    {id:"unpack-2", name:"Home Sweet Home", emoji:"🏡", desc:"Unpack something 5 times.", test:function(s){return s.kw("unpack")>=5;}},
+
+    // Baby: ball
+    {id:"ball-1", name:"First Bounce", emoji:"⚽", desc:"Play ball for the first time.", test:function(s){return s.kw("ball")>=1;}},
+    {id:"ball-2", name:"Ball Wizard", emoji:"🎯", desc:"Play ball 10 times.", test:function(s){return s.kw("ball")>=10;}},
+    // Pull ups
+    {id:"pullup-1", name:"Baby's First Pull-Up", emoji:"🤸", desc:"Do pull ups for the first time.", test:function(s){return s.kw("pull up")>=1;}},
+    {id:"pullup-2", name:"Little Gymnast", emoji:"🥇", desc:"Do pull ups 10 times.", test:function(s){return s.kw("pull up")>=10;}},
+    // Books
+    {id:"books-1", name:"Storybook Start", emoji:"📚", desc:"Play with books for the first time.", test:function(s){return s.kw("book")>=1;}},
+    {id:"books-2", name:"Bookworm Buddy", emoji:"🐛", desc:"Play with books 10 times.", test:function(s){return s.kw("book")>=10;}},
+    // Wood toys
+    {id:"wood-1", name:"Wooden Wonder", emoji:"🧸", desc:"Play with wood toys for the first time.", test:function(s){return s.kw("wood")>=1;}},
+    {id:"wood-2", name:"Block Party Pro", emoji:"🪵", desc:"Play with wood toys 10 times.", test:function(s){return s.kw("wood")>=10;}},
+    // Walk
+    {id:"walk-1", name:"First Steps Out", emoji:"🚶", desc:"Go on a walk for the first time.", test:function(s){return s.kw("walk")>=1;}},
+    {id:"walk-2", name:"Stroller Marathoner", emoji:"🏞️", desc:"Go on a walk 10 times.", test:function(s){return s.kw("walk")>=10;}},
+    // Anchor park / dance
+    {id:"anchor-1", name:"Dance Floor Debut", emoji:"💃", desc:"Anchor park / dance party for the first time.", test:function(s){return s.kw("anchor")>=1;}},
+    {id:"anchor-2", name:"Anchor Park Regular", emoji:"⚓", desc:"Anchor park / dance party 8 times.", test:function(s){return s.kw("anchor")>=8;}},
+    // Library / story time
+    {id:"library-1", name:"Story Time Starter", emoji:"📗", desc:"Library & park / story time for the first time.", test:function(s){return s.kw("library")>=1;}},
+    {id:"library-2", name:"Library Legend", emoji:"🏛️", desc:"Library & park / story time 8 times.", test:function(s){return s.kw("library")>=8;}},
+    // Concord / coloring
+    {id:"concord-1", name:"Crayon Christening", emoji:"🎨", desc:"Concord park / coloring time for the first time.", test:function(s){return s.kw("concord")>=1;}},
+    {id:"concord-2", name:"Concord Park Picasso", emoji:"🖍️", desc:"Concord park / coloring time 8 times.", test:function(s){return s.kw("concord")>=8;}},
+    // Pool
+    {id:"pool-1", name:"Splash Landing", emoji:"💦", desc:"Pool / water table for the first time.", test:function(s){return s.kw("pool")>=1;}},
+    {id:"pool-2", name:"Water Table Whale", emoji:"🐋", desc:"Pool / water table 10 times.", test:function(s){return s.kw("pool")>=10;}},
+    // Puppet show
+    {id:"puppet-1", name:"Curtain Call", emoji:"🎭", desc:"Puppet show for the first time.", test:function(s){return s.kw("puppet")>=1;}},
+    {id:"puppet-2", name:"Puppet Master", emoji:"🎪", desc:"Puppet show 8 times.", test:function(s){return s.kw("puppet")>=8;}},
+    // Stairs
+    {id:"stairs-1", name:"Step One", emoji:"🪜", desc:"Climb stairs for the first time.", test:function(s){return s.kw("stair")>=1;}},
+    {id:"stairs-2", name:"Stair Champion", emoji:"🏔️", desc:"Climb stairs 10 times.", test:function(s){return s.kw("stair")>=10;}},
+
+    // General / meta achievements
+    {id:"first-spin", name:"Wheel Whisperer", emoji:"🎡", desc:"Spin either wheel for the first time.", test:function(s){return s.totalSpins>=1;}},
+    {id:"spins-10", name:"Perfect Ten", emoji:"🔟", desc:"Complete 10 spins in total.", test:function(s){return s.totalSpins>=10;}},
+    {id:"spins-50", name:"Half Century", emoji:"🎖️", desc:"Complete 50 spins in total.", test:function(s){return s.totalSpins>=50;}},
+    {id:"spins-100", name:"Century Club", emoji:"💯", desc:"Complete 100 spins in total.", test:function(s){return s.totalSpins>=100;}},
+    {id:"streak-3", name:"Streak Starter", emoji:"🔥", desc:"Complete an activity 3 days in a row.", test:function(s){return s.longestStreak>=3;}},
+    {id:"streak-7", name:"On Fire", emoji:"⚡", desc:"Complete an activity 7 days in a row.", test:function(s){return s.longestStreak>=7;}},
+    {id:"streak-14", name:"Unstoppable", emoji:"🌋", desc:"Complete an activity 14 days in a row.", test:function(s){return s.longestStreak>=14;}},
+    {id:"clear-1", name:"Full Circle", emoji:"🔄", desc:"Empty a wheel completely for the first time.", test:function(s){return s.totalCleared>=1;}},
+    {id:"clear-5", name:"Cycle Master", emoji:"🔁", desc:"Empty a wheel completely 5 times in total.", test:function(s){return s.totalCleared>=5;}},
+    {id:"clear-both", name:"Double Trouble", emoji:"🌀", desc:"Empty both the Free Time wheel and the Baby wheel at least once each.", test:function(s){return s.bothCleared;}},
+    {id:"early-bird", name:"Early Bird", emoji:"🌅", desc:"Confirm a completed activity before 7am.", test:function(s){return s.hasEarlyBird;}},
+    {id:"night-owl", name:"Night Owl", emoji:"🦉", desc:"Confirm a completed activity after 10pm.", test:function(s){return s.hasNightOwl;}},
+    {id:"weekend-warrior", name:"Weekend Warrior", emoji:"🏖️", desc:"Complete activities on both a Saturday and a Sunday.", test:function(s){return s.weekendWarrior;}},
+    {id:"balanced-life", name:"Balanced Life", emoji:"⚖️", desc:"Complete an activity from both wheels on the same day.", test:function(s){return s.balancedLife;}},
+    {id:"variety-5", name:"Variety Pack", emoji:"🎨", desc:"Complete 5 different kinds of activities.", test:function(s){return s.distinctCount>=5;}},
+    {id:"variety-10", name:"Jack of All Trades", emoji:"🧰", desc:"Complete 10 different kinds of activities.", test:function(s){return s.distinctCount>=10;}},
+    {id:"variety-15", name:"Completionist", emoji:"🏆", desc:"Complete 15 different kinds of activities.", test:function(s){return s.distinctCount>=15;}},
+    {id:"log-editor", name:"Fine Print", emoji:"📝", desc:"Edit a log entry for the first time.", test:function(s){return s.hasEdited;}},
+    {id:"curator", name:"Curator", emoji:"🛠️", desc:"Add a custom option to a wheel.", test:function(s){return s.hasAdded;}},
+    {id:"minimalist", name:"Minimalist", emoji:"✂️", desc:"Remove an option from a wheel.", test:function(s){return s.hasRemoved;}},
+    {id:"fresh-start", name:"Fresh Start", emoji:"🗑️", desc:"Delete a log entry.", test:function(s){return s.hasDeleted;}}
+  ];
+
+  // ---------- State ----------
   function loadState(){
+    var state = null;
     try{
       var raw = localStorage.getItem(STORAGE_KEY);
-      if(raw){
-        var parsed = JSON.parse(raw);
-        if(parsed.freetime && parsed.baby) return parsed;
+      if(raw) state = JSON.parse(raw);
+    }catch(e){ state = null; }
+
+    if(!state || !state.freetime || !state.baby){
+      needsRetroactiveUnlock = false;
+      state = {
+        freetime:{ master: DEFAULTS.freetime.slice(), remaining: DEFAULTS.freetime.slice(), log: [], clearedCount:0, pending:null },
+        baby:{ master: DEFAULTS.baby.slice(), remaining: DEFAULTS.baby.slice(), log: [], clearedCount:0, pending:null },
+        meta:{ hasEdited:false, hasAdded:false, hasRemoved:false, hasDeleted:false },
+        achievementsUnlocked:{}
+      };
+    } else {
+      ["freetime","baby"].forEach(function(k){
+        if(!Array.isArray(state[k].master)) state[k].master = DEFAULTS[k].slice();
+        if(!Array.isArray(state[k].remaining)) state[k].remaining = state[k].master.slice();
+        if(!Array.isArray(state[k].log)) state[k].log = [];
+        if(typeof state[k].clearedCount !== "number") state[k].clearedCount = 0;
+        if(state[k].pending === undefined) state[k].pending = null;
+      });
+      if(!state.meta) state.meta = { hasEdited:false, hasAdded:false, hasRemoved:false, hasDeleted:false };
+      if(!state.achievementsUnlocked){
+        state.achievementsUnlocked = {};
+        needsRetroactiveUnlock = true;
       }
-    }catch(e){}
-    return {
-      freetime:{ master: DEFAULTS.freetime.slice(), remaining: DEFAULTS.freetime.slice(), log: [] },
-      baby:{ master: DEFAULTS.baby.slice(), remaining: DEFAULTS.baby.slice(), log: [] }
-    };
+    }
+
+    // ensure every log entry has a stable id
+    ["freetime","baby"].forEach(function(k){
+      state[k].log.forEach(function(entry){
+        if(!entry.id) entry.id = generateId();
+      });
+    });
+
+    return state;
   }
 
   var data = loadState();
   var spinning = { freetime:false, baby:false };
   var currentManageKey = null;
+  var activeCompleteKey = null;
+  var currentEditKey = null;
+  var currentEditId = null;
 
   function saveState(){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -370,6 +738,10 @@
     return String(str).replace(/[&<>"']/g, function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
     });
+  }
+
+  function generateId(){
+    return "e" + Date.now() + Math.floor(Math.random()*100000);
   }
 
   // ---------- Wheel drawing ----------
@@ -459,9 +831,7 @@
     }
   }
 
-  // ---------- Per-tab wiring ----------
   var WHEEL_SIZE = Math.min(300, window.innerWidth - 64);
-
   var wheels = {};
   ["freetime","baby"].forEach(function(key){
     var canvas = document.getElementById(key+"Canvas");
@@ -471,6 +841,7 @@
     renderLog(key);
   });
 
+  // ---------- Log rendering ----------
   function renderLog(key){
     var listEl = document.getElementById(key+"Log");
     var entries = data[key].log;
@@ -482,17 +853,28 @@
       var d = new Date(e.date);
       var dateStr = d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
       var timeStr = d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-      return '<li><span class="log-date">'+dateStr+' · '+timeStr+'</span>'+
-             '<span class="log-item">'+escapeHtml(e.item)+'</span></li>';
+      return '<li data-id="'+e.id+'"><div class="log-left"><span class="log-date">'+dateStr+' · '+timeStr+'</span>'+
+             '<span class="log-item">'+escapeHtml(e.item)+'</span></div>'+
+             '<button class="log-edit-btn" data-key="'+key+'" data-id="'+e.id+'">✏️</button></li>';
     }).join("");
+  }
+
+  document.getElementById("freetimeLog").addEventListener("click", handleLogClick);
+  document.getElementById("babyLog").addEventListener("click", handleLogClick);
+  function handleLogClick(e){
+    var btn = e.target.closest(".log-edit-btn");
+    if(!btn) return;
+    openEditModal(btn.dataset.key, btn.dataset.id);
   }
 
   function setSpinBtnEnabled(key, enabled){
     document.getElementById(key+"SpinBtn").disabled = !enabled;
   }
 
+  // ---------- Spin flow ----------
   function spinWheel(key){
     if(spinning[key]) return;
+    if(data[key].pending){ openCompleteModal(key); return; }
     var state = data[key];
     if(state.remaining.length === 0) return;
     spinning[key] = true;
@@ -519,43 +901,82 @@
     function handler(e){
       if(e.propertyName !== "transform") return;
       canvas.removeEventListener("transitionend", handler);
-      onSpinComplete(key, randomIndex);
+      onLanded(key, randomIndex);
     }
     canvas.addEventListener("transitionend", handler);
   }
 
-  function onSpinComplete(key, index){
+  function onLanded(key, index){
     var state = data[key];
     var item = state.remaining[index];
-    state.remaining.splice(index, 1);
-    state.log.unshift({ date: new Date().toISOString(), item: item });
+    state.pending = { item: item, timestamp: new Date().toISOString() };
+    saveState();
+    spinning[key] = false;
+    setSpinBtnEnabled(key, false);
+    openCompleteModal(key);
+  }
+
+  function openCompleteModal(key){
+    activeCompleteKey = key;
+    var pending = data[key].pending;
+    if(!pending) return;
+    document.getElementById("completeEmojiDisplay").textContent = pickEmoji(pending.item);
+    document.getElementById("completeItemText").textContent = pending.item;
+    document.getElementById("completeModal").classList.remove("hidden");
+  }
+
+  document.getElementById("completeDoneBtn").addEventListener("click", function(){
+    var key = activeCompleteKey;
+    if(!key) return;
+    var state = data[key];
+    var pending = state.pending;
+    if(!pending){
+      document.getElementById("completeModal").classList.add("hidden");
+      return;
+    }
+
+    var idx = state.remaining.indexOf(pending.item);
+    if(idx === -1) idx = 0;
+    if(state.remaining.length > 0) state.remaining.splice(idx, 1);
+
+    var entry = { id: generateId(), item: pending.item, date: new Date().toISOString() };
+    state.log.unshift(entry);
+    state.pending = null;
+
+    var wheelJustCleared = false;
+    if(state.remaining.length === 0){
+      state.clearedCount = (state.clearedCount || 0) + 1;
+      wheelJustCleared = true;
+    }
     saveState();
     renderLog(key);
+    document.getElementById("completeModal").classList.add("hidden");
+
+    launchEmojiBurst(pickEmoji(entry.item));
+    updateAchievements();
 
     var canvas = wheels[key].canvas;
     var ctx = wheels[key].ctx;
-
-    // snap wheel back upright, then redraw with remaining items
     canvas.style.transition = "none";
     canvas.style.transform = "rotate(0deg)";
     void canvas.offsetWidth;
 
-    if(state.remaining.length === 0){
+    if(wheelJustCleared){
       drawWheel(canvas, ctx, WHEEL_SIZE, []);
-      launchConfetti();
       setTimeout(function(){
-        state.remaining = state.master.slice();
-        saveState();
-        drawWheel(canvas, ctx, WHEEL_SIZE, state.remaining);
-        spinning[key] = false;
-        setSpinBtnEnabled(key, state.remaining.length > 0);
-      }, 2600);
+        launchConfetti();
+        setTimeout(function(){
+          state.remaining = state.master.slice();
+          saveState();
+          drawWheel(canvas, ctx, WHEEL_SIZE, state.remaining);
+          setSpinBtnEnabled(key, state.remaining.length > 0);
+        }, 2600);
+      }, 1300);
     } else {
       drawWheel(canvas, ctx, WHEEL_SIZE, state.remaining);
-      spinning[key] = false;
       setSpinBtnEnabled(key, true);
     }
-  }
+  });
 
   document.getElementById("freetimeSpinBtn").addEventListener("click", function(){ spinWheel("freetime"); });
   document.getElementById("babySpinBtn").addEventListener("click", function(){ spinWheel("baby"); });
@@ -568,6 +989,12 @@
       btn.classList.add("active");
       document.querySelectorAll(".tab-content").forEach(function(p){ p.classList.remove("active"); });
       document.getElementById(btn.dataset.tab+"-panel").classList.add("active");
+      if(btn.dataset.tab === "achievements"){
+        renderAchievements(computeStats());
+      }
+      if(btn.dataset.tab === "history"){
+        renderCalendar();
+      }
     });
   });
 
@@ -605,10 +1032,12 @@
     data[key].master.splice(idx, 1);
     var remIdx = data[key].remaining.indexOf(removedItem);
     if(remIdx !== -1) data[key].remaining.splice(remIdx, 1);
+    data.meta.hasRemoved = true;
     saveState();
     renderManageList();
     drawWheel(wheels[key].canvas, wheels[key].ctx, WHEEL_SIZE, data[key].remaining);
-    setSpinBtnEnabled(key, data[key].remaining.length > 0);
+    setSpinBtnEnabled(key, data[key].remaining.length > 0 && !data[key].pending);
+    updateAchievements();
   });
 
   document.getElementById("addItemBtn").addEventListener("click", addNewItem);
@@ -622,11 +1051,13 @@
     var key = currentManageKey;
     data[key].master.push(val);
     data[key].remaining.push(val);
+    data.meta.hasAdded = true;
     saveState();
     newItemInput.value = "";
     renderManageList();
     drawWheel(wheels[key].canvas, wheels[key].ctx, WHEEL_SIZE, data[key].remaining);
-    setSpinBtnEnabled(key, data[key].remaining.length > 0);
+    setSpinBtnEnabled(key, data[key].remaining.length > 0 && !data[key].pending);
+    updateAchievements();
   }
 
   document.getElementById("freetimeManageBtn").addEventListener("click", function(){ openManage("freetime"); });
@@ -638,7 +1069,63 @@
     if(e.target === manageModal) manageModal.classList.add("hidden");
   });
 
-  // ---------- Confetti ----------
+  // ---------- Edit log entry modal ----------
+  var editLogModal = document.getElementById("editLogModal");
+  var editItemInput = document.getElementById("editItemInput");
+  var editDateInput = document.getElementById("editDateInput");
+
+  function toDatetimeLocalValue(isoString){
+    var d = new Date(isoString);
+    function pad(n){ return String(n).padStart(2,"0"); }
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+  }
+
+  function openEditModal(key, id){
+    currentEditKey = key;
+    currentEditId = id;
+    var entry = data[key].log.find(function(e){ return e.id === id; });
+    if(!entry) return;
+    editItemInput.value = entry.item;
+    editDateInput.value = toDatetimeLocalValue(entry.date);
+    editLogModal.classList.remove("hidden");
+  }
+
+  document.getElementById("saveEditBtn").addEventListener("click", function(){
+    var key = currentEditKey, id = currentEditId;
+    var entry = data[key].log.find(function(e){ return e.id === id; });
+    if(!entry) return;
+    var newVal = editItemInput.value.trim();
+    if(newVal) entry.item = newVal;
+    if(editDateInput.value){
+      var d = new Date(editDateInput.value);
+      if(!isNaN(d.getTime())) entry.date = d.toISOString();
+    }
+    data.meta.hasEdited = true;
+    saveState();
+    renderLog(key);
+    editLogModal.classList.add("hidden");
+    updateAchievements();
+  });
+
+  document.getElementById("deleteEditBtn").addEventListener("click", function(){
+    var key = currentEditKey, id = currentEditId;
+    if(!confirm("Delete this log entry?")) return;
+    data[key].log = data[key].log.filter(function(e){ return e.id !== id; });
+    data.meta.hasDeleted = true;
+    saveState();
+    renderLog(key);
+    editLogModal.classList.add("hidden");
+    updateAchievements();
+  });
+
+  document.getElementById("cancelEditBtn").addEventListener("click", function(){
+    editLogModal.classList.add("hidden");
+  });
+  editLogModal.addEventListener("click", function(e){
+    if(e.target === editLogModal) editLogModal.classList.add("hidden");
+  });
+
+  // ---------- Confetti & emoji burst ----------
   var confettiCanvas = document.getElementById("confettiCanvas");
   var cctx = confettiCanvas.getContext("2d");
   function resizeConfetti(){
@@ -689,7 +1176,307 @@
     requestAnimationFrame(frame);
   }
 
-  // ---------- PWA install support ----------
+  function launchEmojiBurst(emoji){
+    confettiCanvas.style.display = "block";
+    var particles = [];
+    var count = 22;
+    var cx = confettiCanvas.width/2, cy = confettiCanvas.height/2;
+    for(var i=0;i<count;i++){
+      var angle = Math.random()*Math.PI*2;
+      var speed = 3+Math.random()*6;
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed - 4,
+        size: 22+Math.random()*20,
+        rot: Math.random()*360,
+        vrot: -8+Math.random()*16
+      });
+    }
+    var start = performance.now();
+    var duration = 1300;
+    function frame(now){
+      var elapsed = now - start;
+      cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+      particles.forEach(function(p){
+        p.vy += 0.25;
+        p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+        cctx.save();
+        cctx.globalAlpha = Math.max(0, 1-elapsed/duration);
+        cctx.translate(p.x, p.y);
+        cctx.rotate(p.rot*Math.PI/180);
+        cctx.font = p.size+"px sans-serif";
+        cctx.textAlign = "center";
+        cctx.textBaseline = "middle";
+        cctx.fillText(emoji, 0, 0);
+        cctx.restore();
+      });
+      if(elapsed < duration){
+        requestAnimationFrame(frame);
+      } else {
+        cctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        confettiCanvas.style.display = "none";
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- Achievements engine ----------
+  function computeStats(){
+    var freeLog = data.freetime.log, babyLog = data.baby.log;
+    var combined = freeLog.concat(babyLog);
+    var lowerItems = combined.map(function(e){ return e.item.toLowerCase(); });
+
+    function kw(k){
+      var c = 0;
+      for(var i=0;i<lowerItems.length;i++){ if(lowerItems[i].indexOf(k) !== -1) c++; }
+      return c;
+    }
+    function wordKw(k){
+      var re = new RegExp("\\b"+k+"\\b","i");
+      var c = 0;
+      for(var i=0;i<lowerItems.length;i++){ if(re.test(lowerItems[i])) c++; }
+      return c;
+    }
+
+    var totalSpins = combined.length;
+    var distinctCount = new Set(combined.map(function(e){ return e.item.trim().toLowerCase(); })).size;
+
+    var uniqueDayNums = Array.from(new Set(combined.map(function(e){
+      var d = new Date(e.date);
+      return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()/86400000);
+    }))).sort(function(a,b){ return a-b; });
+
+    var longestStreak = 0, curStreak = 0, prev = null;
+    uniqueDayNums.forEach(function(d){
+      if(prev !== null && d === prev+1){ curStreak++; } else { curStreak = 1; }
+      longestStreak = Math.max(longestStreak, curStreak);
+      prev = d;
+    });
+
+    var hasEarlyBird = combined.some(function(e){ return new Date(e.date).getHours() < 7; });
+    var hasNightOwl = combined.some(function(e){ return new Date(e.date).getHours() >= 22; });
+    var hasSaturday = combined.some(function(e){ return new Date(e.date).getDay() === 6; });
+    var hasSunday = combined.some(function(e){ return new Date(e.date).getDay() === 0; });
+
+    var freeDays = new Set(freeLog.map(function(e){ return new Date(e.date).toDateString(); }));
+    var babyDays = new Set(babyLog.map(function(e){ return new Date(e.date).toDateString(); }));
+    var balancedLife = false;
+    freeDays.forEach(function(d){ if(babyDays.has(d)) balancedLife = true; });
+
+    return {
+      kw: kw,
+      wordKw: wordKw,
+      totalSpins: totalSpins,
+      distinctCount: distinctCount,
+      longestStreak: longestStreak,
+      hasEarlyBird: hasEarlyBird,
+      hasNightOwl: hasNightOwl,
+      weekendWarrior: hasSaturday && hasSunday,
+      balancedLife: balancedLife,
+      totalCleared: (data.freetime.clearedCount||0) + (data.baby.clearedCount||0),
+      bothCleared: (data.freetime.clearedCount||0) >= 1 && (data.baby.clearedCount||0) >= 1,
+      hasEdited: !!data.meta.hasEdited,
+      hasAdded: !!data.meta.hasAdded,
+      hasRemoved: !!data.meta.hasRemoved,
+      hasDeleted: !!data.meta.hasDeleted
+    };
+  }
+
+  function renderAchievements(stats){
+    var grid = document.getElementById("achievementsGrid");
+    var unlockedCount = 0;
+    grid.innerHTML = ACHIEVEMENTS.map(function(a){
+      var unlocked = !!data.achievementsUnlocked[a.id];
+      if(unlocked) unlockedCount++;
+      return '<div class="achv-card '+(unlocked?"":"locked")+'" data-id="'+a.id+'">'+
+             (unlocked ? "" : '<div class="achv-lock-badge">🔒</div>') +
+             '<div class="achv-emoji">'+a.emoji+'</div>'+
+             '<div class="achv-name">'+escapeHtml(a.name)+'</div>'+
+             '</div>';
+    }).join("");
+    document.getElementById("achvSummary").textContent = "🏆 " + unlockedCount + " / " + ACHIEVEMENTS.length + " badges unlocked";
+  }
+
+  document.getElementById("achievementsGrid").addEventListener("click", function(e){
+    var card = e.target.closest(".achv-card");
+    if(!card) return;
+    var id = card.dataset.id;
+    var a = ACHIEVEMENTS.find(function(x){ return x.id === id; });
+    if(!a) return;
+    var unlocked = !!data.achievementsUnlocked[id];
+    document.getElementById("badgeModalEmoji").textContent = a.emoji;
+    document.getElementById("badgeModalName").textContent = a.name;
+    document.getElementById("badgeModalStatus").textContent = unlocked ? "✅ Unlocked" : "🔒 Locked";
+    document.getElementById("badgeModalDesc").textContent = a.desc;
+    document.getElementById("badgeModal").classList.remove("hidden");
+  });
+  document.getElementById("closeBadgeModalBtn").addEventListener("click", function(){
+    document.getElementById("badgeModal").classList.add("hidden");
+  });
+  document.getElementById("badgeModal").addEventListener("click", function(e){
+    if(e.target === document.getElementById("badgeModal")) document.getElementById("badgeModal").classList.add("hidden");
+  });
+
+  var toastQueue = [];
+  var toastShowing = false;
+  function queueToast(a){
+    toastQueue.push(a);
+    if(!toastShowing) showNextToast();
+  }
+  function showNextToast(){
+    if(toastQueue.length === 0){ toastShowing = false; return; }
+    toastShowing = true;
+    var a = toastQueue.shift();
+    document.getElementById("toastEmoji").textContent = a.emoji;
+    document.getElementById("toastName").textContent = a.name;
+    var toast = document.getElementById("achievementToast");
+    toast.classList.add("show");
+    setTimeout(function(){
+      toast.classList.remove("show");
+      setTimeout(showNextToast, 500);
+    }, 2600);
+  }
+
+  function updateAchievements(){
+    var stats = computeStats();
+    var newlyUnlocked = [];
+    ACHIEVEMENTS.forEach(function(a){
+      var already = data.achievementsUnlocked[a.id];
+      if(!already && a.test(stats)){
+        data.achievementsUnlocked[a.id] = new Date().toISOString();
+        newlyUnlocked.push(a);
+      }
+    });
+    if(newlyUnlocked.length > 0) saveState();
+    if(document.getElementById("achievements-panel").classList.contains("active")){
+      renderAchievements(stats);
+    }
+    newlyUnlocked.forEach(function(a){ queueToast(a); });
+  }
+
+  // ---------- History calendar ----------
+  var MONTH_NAMES = ["January","February","March","April","May","June","July",
+                      "August","September","October","November","December"];
+  var now0 = new Date();
+  var calYear = now0.getFullYear();
+  var calMonth = now0.getMonth();
+
+  function combinedLogWithSource(){
+    var free = data.freetime.log.map(function(e){ return {id:e.id, item:e.item, date:e.date, source:"freetime"}; });
+    var baby = data.baby.log.map(function(e){ return {id:e.id, item:e.item, date:e.date, source:"baby"}; });
+    return free.concat(baby);
+  }
+
+  function renderCalendar(){
+    document.getElementById("calMonthLabel").textContent = MONTH_NAMES[calMonth] + " " + calYear;
+
+    var firstDay = new Date(calYear, calMonth, 1);
+    var startWeekday = firstDay.getDay();
+    var daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+
+    var combined = combinedLogWithSource();
+    var byDay = {};
+    combined.forEach(function(e){
+      var d = new Date(e.date);
+      if(d.getFullYear() === calYear && d.getMonth() === calMonth){
+        var dn = d.getDate();
+        if(!byDay[dn]) byDay[dn] = [];
+        byDay[dn].push(e);
+      }
+    });
+
+    var today = new Date();
+    var isCurrentMonth = today.getFullYear() === calYear && today.getMonth() === calMonth;
+
+    var html = "";
+    for(var i=0; i<startWeekday; i++){
+      html += '<div class="cal-cell empty"></div>';
+    }
+    for(var day=1; day<=daysInMonth; day++){
+      var entries = byDay[day] || [];
+      var isToday = isCurrentMonth && today.getDate() === day;
+      var shown = entries.slice(0,3);
+      var iconsHtml = shown.map(function(e){ return '<span class="cal-icon">'+pickEmoji(e.item)+'</span>'; }).join("");
+      var moreHtml = entries.length > 3 ? '<span class="cal-more">+'+(entries.length-3)+'</span>' : "";
+      html += '<div class="cal-cell'+(isToday?" today":"")+'" data-day="'+day+'">'+
+              '<div class="cal-daynum">'+day+'</div>'+
+              '<div class="cal-icons">'+iconsHtml+moreHtml+'</div>'+
+              '</div>';
+    }
+    document.getElementById("calGrid").innerHTML = html;
+  }
+
+  document.getElementById("calPrevBtn").addEventListener("click", function(){
+    calMonth--;
+    if(calMonth < 0){ calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+  document.getElementById("calNextBtn").addEventListener("click", function(){
+    calMonth++;
+    if(calMonth > 11){ calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  document.getElementById("calGrid").addEventListener("click", function(e){
+    var cell = e.target.closest(".cal-cell");
+    if(!cell || cell.classList.contains("empty")) return;
+    openDayDetail(parseInt(cell.dataset.day, 10));
+  });
+
+  function openDayDetail(day){
+    var combined = combinedLogWithSource();
+    var entries = combined.filter(function(e){
+      var d = new Date(e.date);
+      return d.getFullYear() === calYear && d.getMonth() === calMonth && d.getDate() === day;
+    }).sort(function(a,b){ return new Date(a.date) - new Date(b.date); });
+
+    document.getElementById("dayDetailTitle").textContent = MONTH_NAMES[calMonth] + " " + day + ", " + calYear;
+
+    var listEl = document.getElementById("dayDetailList");
+    if(entries.length === 0){
+      listEl.innerHTML = '<li style="text-align:center;color:#aaa;font-style:italic;padding:14px 0;">Nothing logged this day</li>';
+    } else {
+      listEl.innerHTML = entries.map(function(e){
+        var t = new Date(e.date).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+        var tag = e.source === "freetime" ? "🎯" : "👶";
+        return '<li style="padding:9px 2px;border-bottom:1px solid #eee;display:flex;gap:10px;align-items:center;">'+
+               '<span style="font-size:1.3rem;">'+pickEmoji(e.item)+'</span>'+
+               '<span style="flex:1;font-weight:600;">'+escapeHtml(e.item)+'</span>'+
+               '<span style="color:#999;font-size:0.76rem;white-space:nowrap;">'+tag+" "+t+'</span></li>';
+      }).join("");
+    }
+    document.getElementById("dayDetailModal").classList.remove("hidden");
+  }
+
+  document.getElementById("closeDayDetailBtn").addEventListener("click", function(){
+    document.getElementById("dayDetailModal").classList.add("hidden");
+  });
+  document.getElementById("dayDetailModal").addEventListener("click", function(e){
+    if(e.target === document.getElementById("dayDetailModal")) document.getElementById("dayDetailModal").classList.add("hidden");
+  });
+
+  // ---------- Init ----------
+  ["freetime","baby"].forEach(function(key){
+    setSpinBtnEnabled(key, data[key].remaining.length > 0 && !data[key].pending);
+  });
+
+  if(needsRetroactiveUnlock){
+    var stats0 = computeStats();
+    ACHIEVEMENTS.forEach(function(a){
+      if(a.test(stats0)) data.achievementsUnlocked[a.id] = new Date().toISOString();
+    });
+    saveState();
+    renderAchievements(stats0);
+  } else {
+    renderAchievements(computeStats());
+  }
+
+  renderCalendar();
+
+  var pendingKey = data.freetime.pending ? "freetime" : (data.baby.pending ? "baby" : null);
+  if(pendingKey) openCompleteModal(pendingKey);
+
   if("serviceWorker" in navigator){
     window.addEventListener("load", function(){
       navigator.serviceWorker.register("sw.js").catch(function(){});
