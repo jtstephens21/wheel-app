@@ -1,4 +1,4 @@
-const CACHE_NAME = "wheel-app-cache-v1";
+const CACHE_NAME = "wheel-app-cache-v3";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function(event){
@@ -11,7 +11,11 @@ self.addEventListener("install", function(event){
 });
 
 self.addEventListener("activate", function(event){
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(function(names){
+      return Promise.all(names.filter(function(n){ return n !== CACHE_NAME; }).map(function(n){ return caches.delete(n); }));
+    }).then(function(){ return self.clients.claim(); })
+  );
 });
 
 self.addEventListener("fetch", function(event){
